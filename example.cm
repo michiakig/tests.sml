@@ -1,0 +1,7 @@
+Library
+    structure Example
+is
+    framework.cm
+    ../lib.sml/lib.cm
+    example.sml
+    $/basis.cm
