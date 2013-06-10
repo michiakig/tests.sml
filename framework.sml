@@ -9,7 +9,10 @@ structure Test =
       (* eqtype index, requiring only a show fn *)
       type ''a polyidx = {show: ''a Show.t}
 
-      type 'a testcase = unit -> {actual: 'a, expected: 'a}
+      (* type shorthand for thunks, used to delay test case execution *)
+      type 'a thunk = unit -> 'a
+
+      type 'a testcase = {actual: 'a, expected: 'a} thunk
       datatype result = Pass | Fail of string
       type 'a assert = 'a testcase -> result
 
