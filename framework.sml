@@ -16,9 +16,8 @@ structure Test =
       datatype result = Pass | Fail of string
       type 'a assert = 'a testcase -> result
 
-      (* a suite is a list of thunks returning (name, verbose, concise) *)
-      (* note suites can be heterogeneous, ie contain test cases of different types *)
-      type testsuite = (unit -> string * string * string) list
+      (* a suite is a list of (name, verbose, concise) *)
+      type results = (string * string * string) list
 
       (* assert fn constructors *)
       val genAssertEq: 'a genidx -> 'a assert =
@@ -42,44 +41,43 @@ structure Test =
                  Pass => (name, "pass", ".")
                | Fail msg => (name, "FAIL " ^ msg, "F")
 
-      val concat: testsuite list -> testsuite = List.concat
+      val concat: results list -> results = List.concat
 
       (* make a singleton test suite *)
-      val single: string * 'a assert * 'a testcase -> testsuite =
-       fn t => [fn () => apply t]
+      val single: string * 'a assert * 'a testcase -> results =
+       fn t => [apply t]
 
       (* make a test suite from a group of testcases *)
-      val group: string * 'a assert * 'a testcase list -> testsuite =
+      val group: string * 'a assert * 'a testcase list -> results =
        fn (name, assert, cases) =>
-          map (fn c => fn () => apply (name, assert, c)) cases
+          map (fn c => apply (name, assert, c)) cases
 
       local
          val bool = genAssertEq {eq = Eq.bool, show = Show.bool}
       in
          (* makes test suite from boolean assertions... *)
-         val assertTrue: string * bool -> testsuite =
+         val assertTrue: string * bool -> results =
              fn (name, actual) =>
-                [fn () => apply (name, bool,
-                                 fn _ => {actual = actual, expected = true})]
+                [apply (name, bool,
+                        fn _ => {actual = actual, expected = true})]
 
-         val assertFalse: string * bool -> testsuite =
+         val assertFalse: string * bool -> results =
              fn (name, actual) =>
-                [fn () => apply (name, bool,
-                                 fn _ => {actual = actual, expected = false})]
+                [apply (name, bool,
+                        fn _ => {actual = actual, expected = false})]
 
          (* ... and lists of boolean assertions *)
-         val assertAllTrue: string * bool list -> testsuite =
+         val assertAllTrue: string * bool list -> results =
           fn (name, actuals) => concat (map (fn a => assertTrue (name, a)) actuals)
 
-         val assertAllFalse: string * bool list -> testsuite =
+         val assertAllFalse: string * bool list -> results =
           fn (name, actuals) => concat (map (fn a => assertFalse (name, a)) actuals)
       end
 
       (* actually run a test suite, printing either verbose or concise results *)
-      val runTestSuite: bool * testsuite -> unit =
-       fn (verbose, tests) =>
+      val runTestSuite: bool * results -> unit =
+       fn (verbose, results) =>
           let
-             val results = map (fn f => f ()) tests
              fun p (n, v, c) =
                  if verbose
                     then print ("[" ^ n ^ "] " ^ v ^ "\n")
