@@ -2,5 +2,5 @@ Library
     structure Test
 is
     framework.sml
-    ../lib/lib.cm
+    ../lib.sml/lib.cm
     $/basis.cm
