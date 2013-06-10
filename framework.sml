@@ -21,13 +21,13 @@ structure Test =
       val genAssertEq: 'a genidx -> 'a assert =
        fn {eq, show} =>
           fn thunk =>
-             let
+             (let
                 val {actual, expected} = thunk ()
              in
                 if eq (actual, expected)
                    then Pass
                 else Fail ("expected: " ^ show expected ^ ", but got: " ^ show actual)
-             end
+             end) handle e => Fail ("uncaught exception: " ^ exnName e)
 
       val polyAssertEq: ''a polyidx -> ''a assert =
        fn {show} => genAssertEq {eq=op =,show=show}
