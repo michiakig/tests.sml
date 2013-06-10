@@ -9,7 +9,7 @@ structure Test =
       (* eqtype index, requiring only a show fn *)
       type ''a polyidx = {show: ''a Show.t}
 
-      type 'a testcase = {actual: 'a, expected: 'a}
+      type 'a testcase = unit -> {actual: 'a, expected: 'a}
       datatype result = Pass | Fail of string
       type 'a assert = 'a testcase -> result
 
@@ -20,10 +20,14 @@ structure Test =
       (* assert fn constructors *)
       val genAssertEq: 'a genidx -> 'a assert =
        fn {eq, show} =>
-          fn (data as {actual, expected}) =>
-             if eq (actual, expected)
-                then Pass
-             else Fail ("expected: " ^ show expected ^ ", but got: " ^ show actual)
+          fn thunk =>
+             let
+                val {actual, expected} = thunk ()
+             in
+                if eq (actual, expected)
+                   then Pass
+                else Fail ("expected: " ^ show expected ^ ", but got: " ^ show actual)
+             end
 
       val polyAssertEq: ''a polyidx -> ''a assert =
        fn {show} => genAssertEq {eq=op =,show=show}
@@ -52,11 +56,13 @@ structure Test =
          (* makes test suite from boolean assertions... *)
          val assertTrue: string * bool -> testsuite =
              fn (name, actual) =>
-                [fn () => apply (name, bool, {actual = actual, expected = true})]
+                [fn () => apply (name, bool,
+                                 fn _ => {actual = actual, expected = true})]
 
          val assertFalse: string * bool -> testsuite =
              fn (name, actual) =>
-                [fn () => apply (name, bool, {actual = actual, expected = false})]
+                [fn () => apply (name, bool,
+                                 fn _ => {actual = actual, expected = false})]
 
          (* ... and lists of boolean assertions *)
          val assertAllTrue: string * bool list -> testsuite =
