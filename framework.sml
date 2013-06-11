@@ -53,27 +53,19 @@ structure Test =
        fn (name, assert, cases) =>
           map (fn c => fn () => run (name, assert, c)) cases
 
-      (* local *)
-      (*    val bool = genAssertEq {eq = Eq.bool, show = Show.bool} *)
-      (* in *)
-      (*    (* makes test suite from boolean assertions... *) *)
-      (*    val assertTrue: string * bool -> results = *)
-      (*        fn (name, actual) => *)
-      (*           [apply (name, bool, *)
-      (*                   fn _ => {actual = actual, expected = true})] *)
+      local
+         val bool = genEq {eq = Eq.bool, show = Show.bool}
+      in
+         (* makes test suite from boolean assertions... *)
+         val assertTrue: string * (bool thunk) -> suite =
+             fn (name, actual) => (* wrap user's thunk in a testcase and a thunk *)
+                [fn () => run (name, bool, fn () => {actual = actual (), expected = true})]
 
-      (*    val assertFalse: string * bool -> results = *)
-      (*        fn (name, actual) => *)
-      (*           [apply (name, bool, *)
-      (*                   fn _ => {actual = actual, expected = false})] *)
+         val assertFalse: string * (bool thunk) -> suite =
+             fn (name, actual) =>
+                [fn () => run (name, bool, fn () => {actual = actual (), expected = false})]
 
-      (*    (* ... and lists of boolean assertions *) *)
-      (*    val assertAllTrue: string * bool list -> results = *)
-      (*     fn (name, actuals) => concat (map (fn a => assertTrue (name, a)) actuals) *)
-
-      (*    val assertAllFalse: string * bool list -> results = *)
-      (*     fn (name, actuals) => concat (map (fn a => assertFalse (name, a)) actuals) *)
-      (* end *)
+      end
 
       (* actually run a test suite, printing either verbose or concise results *)
       val runTestSuite: bool * suite -> unit =
