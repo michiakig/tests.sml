@@ -1,0 +1,14 @@
+tiny testing framework/library for Standard ML. see example.sml for
+how to use it, and run those tests with `make test`. should get:
+
+$ make test
+ml-build example.cm Example.main
+Standard ML of New Jersey v110.75 [built: Sat May 25 23:19:32 2013]
+[scanning example.cm]
+...
+sml @SMLload=example.x86-darwin
+[rev] pass
+[tl] pass
+[hd] FAIL uncaught exception: Empty
+[null] pass
+
