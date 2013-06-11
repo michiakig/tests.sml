@@ -81,27 +81,3 @@ structure Test =
           end
 
    end
-
-(* example use *)
-(*
-structure Main =
-   struct
-      local
-         open Test
-         val int = genAssertEq {eq = Eq.int, show = Show.int} ;
-         val tests = [single ("plus", int, {actual = 1 + 1, expected = 2}),
-                      group ("mult", int,
-                             [{actual = 1 * 1, expected = 1},
-                              {actual = 2 * 4, expected = 6}]),
-                      assertTrue ("lt", 2 < 3),
-                      assertFalse ("gt", 2 > 1),
-                      assertAllTrue ("eq",
-                                     [1 = 1,
-                                      2 = 2,
-                                      3 = 4])]
-      in
-         fun main _ = (runTestSuite (false, concat tests);
-                       OS.Process.success)
-      end
-   end
-*)
